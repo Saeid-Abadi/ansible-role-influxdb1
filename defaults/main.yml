@@ -1,44 +1,56 @@
 ---
-# influxdb configuration
 influxdb_db_dir: "/var/lib/influxdb"
-influxdb_config_dir: "/etc/influxdb"
-influxdb_log_dir: "var/log/influxdb"
-influxdb_bind_address: localhost
+influxdb_conf_dir: "/etc/influxdb"
+influxdb_log_dir: "/var/log/influxdb"
+influxdb_bind_address: "0.0.0.0"
 tls_cert_path: ""
 tls_key_path: ""
 influxdb_https: false
+
 influxdb_config: |
   reporting-disabled = true
-  bind-address = "{{ influxdb_bind_address }}:8088"
+  bind-address = "{{ influxdb_bind_address }}:8088" #  kann andere addresse haben
+
   [meta]
     dir = "{{ influxdb_db_dir }}/meta"
+
   [data]
     dir = "{{ influxdb_db_dir }}/data"
     wal-dir = "{{ influxdb_db_dir }}/wal"
+
   [coordinator]
   [retention]
   [shard-precreation]
   [monitor]
+
   [http]
     auth-enabled = true
-    bind-address = "{{ influxdb_bind_address }}"
-    https-enabled = "{{ influxdb_https }}"
+    bind-address = "{{ influxdb_bind_address }}:8086"
+    https-enabled = {{ influxdb_https | string | lower }} 
     https-certificate = "{{ tls_cert_path }}"
     https-private-key = "{{ tls_key_path }}"
     access-log-path = "{{ influxdb_log_dir }}/access.log"
+
   [ifql]
   [logging]
   [subscriber]
+
   [[graphite]]
   [[collectd]]
   [[opentsdb]]
   [[udp]]
-  [tls]
-  min-version = "tls1.3"
-  max-version = "tls1.3"
-  ciphers = [ "TLS_AES_128_GCM_SHA256","TLS_AES_256_GCM_SHA384", "TLS_CHACHA20_POLY1305_SHA256" ]
 
-# influsdb database
+  [tls]
+    min-version = "tls1.2"
+    max-version = "tls1.2"
+    ciphers = [
+      "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+      "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+      "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+      "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+    ]
+
+# influxdb database
 influxdb_db_username: icinga
 influxdb_db_password: icinga
 influxdb_db_name: icinga
