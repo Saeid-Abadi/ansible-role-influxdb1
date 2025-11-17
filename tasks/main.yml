@@ -1,0 +1,45 @@
+---
+- name: Install influxDB on debian
+  ansible.builtin.apt:
+    name: influxdb
+    state: present
+    update_cache: yes
+
+- name: Enabel/Start influxdb service
+  ansible.builtin.systemd_service: 
+    name: inflxdb
+    state: start
+    unmask: yes
+
+- name: Create influxdb_db_dir directory
+  ansible.builtin.file:
+    path: "{{ influxdb_db_dir }}"
+    mode: 0755
+    owner: influxdb
+    group: influxdb 
+    state: directory
+
+- name: Create influxdb_log_dir directory
+  ansible.builtin.file:
+    path: "{{ influxdb_log_dir }}"
+    mode: 0750
+    owner: influxdb
+    group: influxdb
+    state: directory
+
+- name: Create influxdb.conf
+  ansible.builtin.template:
+    src: influxd.conf.j2
+    dest: "{{ influxdb_conf_dir }}/influxdb.conf"
+    validate: echo %s
+  notify: Restart influxdb  
+
+- name: Create database using custom credentials
+  community.general.influxdb_database:
+    hostname: "{{influxdb_bind_address}}"
+    username: "{{influxdb_db_username}}"
+    password: "{{influxdb_db_password}}"
+    database_name: "{{influxdb_db_name}}"
+    ssl: "{{ influxdb_https }}"
+    validate_certs: "{{ true if influxdb_https else false }}"
+  notify: Restart influxdb
