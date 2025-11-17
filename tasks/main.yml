@@ -7,9 +7,9 @@
 
 - name: Enabel/Start influxdb service
   ansible.builtin.systemd_service: 
-    name: inflxdb
-    state: start
-    unmask: yes
+    name: influxdb
+    state: started
+    masked: no
 
 - name: Create influxdb_db_dir directory
   ansible.builtin.file:
@@ -33,6 +33,10 @@
     dest: "{{ influxdb_conf_dir }}/influxdb.conf"
     validate: echo %s
   notify: Restart influxdb  
+
+- name: Install python lib for infuxdb
+  pip: 
+    name: influxdb
 
 - name: Create database using custom credentials
   community.general.influxdb_database:

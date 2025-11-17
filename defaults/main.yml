@@ -1,6 +1,7 @@
 ---
 # influxdb configuration
-influxdb_db_dir: "/etc/influxdb"
+influxdb_db_dir: "/var/lib/influxdb"
+influxdb_config_dir: "/etc/influxdb"
 influxdb_log_dir: "var/log/influxdb"
 influxdb_bind_address: localhost
 tls_cert_path: ""
