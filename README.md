@@ -13,7 +13,7 @@ Initial installation and configuration of InfluxDB v1. Currently, only Debian-ba
 
 ---
 
-## 🌐 Network & Binding
+##  Network & Binding
 
 | Variable | Default | Description |
 |---------|---------|-------------|
