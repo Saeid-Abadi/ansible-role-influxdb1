@@ -13,7 +13,7 @@ influxdb_https: false
 
 influxdb_config: |
   reporting-disabled = true
-  bind-address = "{{ influxdb_bind_address }}:8088" #  kann andere addresse haben
+  bind-address = "{{ influxdb_bind_address }}:8088"
 
   [meta]
     dir = "{{ influxdb_db_dir }}/meta"
