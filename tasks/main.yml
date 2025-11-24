@@ -5,7 +5,7 @@
     state: present
     update_cache: yes
 
-- name: Install influxDB on debian
+- name: Install influxdb
   ansible.builtin.apt:
     name: influxdb
     state: present
@@ -17,7 +17,7 @@
     state: started
     masked: no
 
-- name: Create influxdb_db_dir directory
+- name: Create influxdb config directory
   ansible.builtin.file:
     path: "{{ influxdb_db_dir }}"
     mode: 0755
@@ -25,7 +25,7 @@
     group: influxdb 
     state: directory
 
-- name: Create influxdb_log_dir directory
+- name: Create influxdb log directory
   ansible.builtin.file:
     path: "{{ influxdb_log_dir }}"
     mode: 0750
@@ -39,12 +39,12 @@
     dest: "{{ influxdb_conf_dir }}/influxdb.conf"
     validate: echo %s
 
-- name: Install python lib for infuxdb
-  pip: 
+- name: Install influxdb-pip
+  ansible.builtin.pip: 
     name: influxdb
     executable: pip3
 
-- name: Check if auth is already switched on (from previous run/install)
+- name: Check auth status
   ansible.builtin.uri:
     url: "http://{{ influxdb_bind_address }}:{{ influxdb_port}}/query"
     status_code:
@@ -53,22 +53,21 @@
       - 401
   register: query_result
 
-- name: Create InfluxDB admin user
+- name: Create Influxdb admin user
   community.general.influxdb_user:
-    hostname:       "{{ influxdb_bind_address }}"
+    hostname: "{{ influxdb_bind_address }}"
     port: "{{ influxdb_port }}"
-    user_name:      "{{ influxdb_admin_user }}"
-    user_password:  "{{ influxdb_admin_pw }}"
+    user_name: "{{ influxdb_admin_user }}"
+    user_password: "{{ influxdb_admin_pw }}"
     admin: true
     state: present
     ssl: "{{ influxdb_https }}"
     validate_certs: "{{ true if influxdb_https else false }}"
-  register: admin_user_creation
   when:
     - influxdb_basic_auth | bool
     - query_result.json['error'] != "unable to parse authentication credentials"
 
-- name: Create database
+- name: Create influxdb database
   community.general.influxdb_database:
     hostname: "{{ influxdb_bind_address }}"
     port: "{{ influxdb_port }}"
