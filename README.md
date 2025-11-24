@@ -87,7 +87,7 @@ influxdb_config: |
       "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
       "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
     ]
-
+```
 ---
 
 ##  Database Creation Variables
@@ -98,11 +98,4 @@ influxdb_config: |
 | `influxdb_db_pw` | `mydb` | Password for the database user. |
 | `influxdb_db_name` | `mydb` | Database name to be created. |
 | `influxdb_db_priviliges` | list | Privileges assigned to the user for the database. |
-
-### Example
-
-```yaml
-influxdb_db_priviliges:
-  - database: '{{ influxdb_db_name }}'
-    privilege: 'ALL'
 
