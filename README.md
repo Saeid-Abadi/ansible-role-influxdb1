@@ -1,13 +1,9 @@
 # InfluxDB1
 Initial installation and configuration of InfluxDB v1. Currently, only Debian-based systems are supported.
 
-# InfluxDB Ansible Role — Variables Reference
-
-This document provides an overview of all variables used to configure an InfluxDB 1.x instance with this Ansible role.
-
 ---
 
-## 📂 Directory Paths
+##  Directory Paths
 
 | Variable | Default | Description |
 |---------|---------|-------------|
@@ -26,7 +22,7 @@ This document provides an overview of all variables used to configure an InfluxD
 
 ---
 
-## 🔐 Authentication
+##  Authentication
 
 | Variable | Default | Description |
 |---------|---------|-------------|
@@ -36,7 +32,7 @@ This document provides an overview of all variables used to configure an InfluxD
 
 ---
 
-## 🔒 TLS / HTTPS Configuration
+##  TLS / HTTPS Configuration
 
 | Variable | Default | Description |
 |---------|---------|-------------|
@@ -46,7 +42,7 @@ This document provides an overview of all variables used to configure an InfluxD
 
 ---
 
-## ⚙️ InfluxDB Configuration Template (`influxdb_config`)
+##  InfluxDB Configuration Template (`influxdb_config`)
 
 ```yaml
 influxdb_config: |
@@ -91,4 +87,22 @@ influxdb_config: |
       "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
       "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
     ]
+
+---
+
+##  Database Creation Variables
+
+| Variable | Default | Description |
+|---------|---------|-------------|
+| `influxdb_db_user` | `mydb` | Username for the database. |
+| `influxdb_db_pw` | `mydb` | Password for the database user. |
+| `influxdb_db_name` | `mydb` | Database name to be created. |
+| `influxdb_db_priviliges` | list | Privileges assigned to the user for the database. |
+
+### Example
+
+```yaml
+influxdb_db_priviliges:
+  - database: '{{ influxdb_db_name }}'
+    privilege: 'ALL'
 
