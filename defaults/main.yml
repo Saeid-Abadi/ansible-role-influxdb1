@@ -3,6 +3,10 @@ influxdb_db_dir: "/var/lib/influxdb"
 influxdb_conf_dir: "/etc/influxdb"
 influxdb_log_dir: "/var/log/influxdb"
 influxdb_bind_address: "0.0.0.0"
+influxdb_port: "8086"
+influxdb_admin_user: "admin"
+influxdb_admin_pw: "admin"
+influxdb_basic_auth: true 
 tls_cert_path: ""
 tls_key_path: ""
 influxdb_https: false
@@ -24,7 +28,7 @@ influxdb_config: |
   [monitor]
 
   [http]
-    auth-enabled = true
+    auth-enabled = {{ influxdb_basic_auth | string | lower }}
     bind-address = "{{ influxdb_bind_address }}:8086"
     https-enabled = {{ influxdb_https | string | lower }} 
     https-certificate = "{{ tls_cert_path }}"
@@ -51,6 +55,9 @@ influxdb_config: |
     ]
 
 # influxdb database
-influxdb_db_username: icinga
-influxdb_db_password: icinga
+influxdb_db_user: icinga
+influxdb_db_pw: icinga
 influxdb_db_name: icinga
+influxdb_db_priviliges:
+  - database: '{{ influxdb_db_name }}'
+    privilege: 'ALL'

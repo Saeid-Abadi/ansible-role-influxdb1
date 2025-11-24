@@ -3,6 +3,7 @@
   ansible.builtin.apt:
     name: python3-pip
     state: present
+    update_cache: yes
 
 - name: Install influxDB on debian
   ansible.builtin.apt:
@@ -37,19 +38,56 @@
     src: influxd.conf.j2
     dest: "{{ influxdb_conf_dir }}/influxdb.conf"
     validate: echo %s
-  notify: Restart influxdb  
 
 - name: Install python lib for infuxdb
   pip: 
     name: influxdb
     executable: pip3
 
-- name: Create database using custom credentials
+- name: Check if auth is already switched on (from previous run/install)
+  ansible.builtin.uri:
+    url: "http://{{ influxdb_bind_address }}:{{ influxdb_port}}/query"
+    status_code:
+      - 200
+      - 400
+      - 401
+  register: query_result
+
+- name: Create InfluxDB admin user
+  community.general.influxdb_user:
+    hostname:       "{{ influxdb_bind_address }}"
+    port: "{{ influxdb_port }}"
+    user_name:      "{{ influxdb_admin_user }}"
+    user_password:  "{{ influxdb_admin_pw }}"
+    admin: true
+    state: present
+    ssl: "{{ influxdb_https }}"
+    validate_certs: "{{ true if influxdb_https else false }}"
+  register: admin_user_creation
+  when:
+    - influxdb_basic_auth | bool
+    - query_result.json['error'] != "unable to parse authentication credentials"
+
+- name: Create database
   community.general.influxdb_database:
-    hostname: "{{influxdb_bind_address}}"
-    username: "{{influxdb_db_username}}"
-    password: "{{influxdb_db_password}}"
-    database_name: "{{influxdb_db_name}}"
+    hostname: "{{ influxdb_bind_address }}"
+    port: "{{ influxdb_port }}"
+    username: "{{ influxdb_admin_user }}"
+    password: "{{ influxdb_admin_pw }}"
+    database_name: "{{ influxdb_db_name }}"
+    ssl: "{{ influxdb_https }}"
+    validate_certs: "{{ true if influxdb_https else false }}"
+
+- name: Create user for database
+  community.general.influxdb_user:
+    hostname: "{{ influxdb_bind_address }}"
+    port: "{{ influxdb_port }}"
+    username: "{{ influxdb_admin_user }}"
+    password: "{{ influxdb_admin_pw }}"
+    user_name:      "{{ influxdb_db_user }}"
+    user_password:  "{{ influxdb_db_pw }}"
+    state: present
+    grants: "{{ influxdb_db_priviliges }}"
     ssl: "{{ influxdb_https }}"
     validate_certs: "{{ true if influxdb_https else false }}"
   notify: Restart influxdb
