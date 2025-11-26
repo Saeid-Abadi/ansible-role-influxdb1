@@ -94,8 +94,8 @@ influxdb_config: |
 
 | Variable | Default | Description |
 |---------|---------|-------------|
-| `influxdb_db_user` | `mydb` | Username for the database. |
-| `influxdb_db_pw` | `mydb` | Password for the database user. |
-| `influxdb_db_name` | `mydb` | Database name to be created. |
-| `influxdb_db_priviliges` | list | Privileges assigned to the user for the database. |
+| `influxdb_db_user` | `icinga` | Username for the database. |
+| `influxdb_db_pw` | `icinga` | Password for the database user. |
+| `influxdb_db_name` | `icinga` | Database name to be created. |
+| `influxdb_db_priviliges` | ALL | Privileges assigned to the user for the database. |
 
