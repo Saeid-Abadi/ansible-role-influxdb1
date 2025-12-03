@@ -1,10 +1,4 @@
 ---
-- name: Install python3 
-  ansible.builtin.apt:
-    name: python3-pip
-    state: present
-    update_cache: yes
-
 - name: Install influxdb
   ansible.builtin.apt:
     name: influxdb
@@ -41,8 +35,8 @@
 
 - name: Install influxdb-pip
   ansible.builtin.pip: 
-    name: influxdb
-    executable: pip3
+    name: python3-influxdb
+    state: present
 
 - name: Check auth status
   ansible.builtin.uri:
