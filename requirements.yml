@@ -1,3 +1,4 @@
+---
 roles:
   - name: influxdb1
     src: https://github.com/Saeid-Abadi/ansible-role-influxdb1.git
