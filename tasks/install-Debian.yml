@@ -1,0 +1,13 @@
+---
+- name: Install prerequisite packages (Debian)
+  ansible.builtin.apt:
+    name: "{{ influxdb_prereq_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Install InfluxDB (Debian)
+  ansible.builtin.apt:
+    name: "{{ influxdb_package_name }}"
+    state: present
+    update_cache: true

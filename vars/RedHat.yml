@@ -1,0 +1,17 @@
+---
+# OS-family specific variables for RHEL / CentOS / Rocky / AlmaLinux
+
+influxdb_package_name: influxdb
+influxdb_service_name: influxdb
+
+# Official InfluxData YUM repository — InfluxDB v1 is not in the
+# default RHEL/CentOS repositories, so this repository is required.
+influxdb_repo_name: influxdata
+influxdb_repo_description: "InfluxData Repository - Stable"
+influxdb_repo_baseurl: "https://repos.influxdata.com/rhel/$releasever/$basearch/stable"
+influxdb_repo_gpgkey: "https://repos.influxdata.com/influxdata-archive_compat.key"
+
+influxdb_prereq_packages:
+  - ca-certificates
+  - curl
+  - python3-pip

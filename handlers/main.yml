@@ -1,5 +1,5 @@
 ---
 - name: Restart influxdb
   ansible.builtin.service:
-    name: influxdb
+    name: "{{ influxdb_service_name | default('influxdb') }}"
     state: restarted

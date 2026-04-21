@@ -1,0 +1,10 @@
+---
+# OS-family specific variables for Debian / Ubuntu
+
+influxdb_package_name: influxdb
+influxdb_service_name: influxdb
+
+influxdb_prereq_packages:
+  - ca-certificates
+  - curl
+  - python3-pip

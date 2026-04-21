@@ -1,15 +1,38 @@
 ---
+# Directory paths
 influxdb_db_dir: "/var/lib/influxdb"
 influxdb_conf_dir: "/etc/influxdb"
 influxdb_log_dir: "/var/log/influxdb"
+
+# File ownership
+influxdb_user: influxdb
+influxdb_group: influxdb
+
+# Networking
 influxdb_bind_address: "0.0.0.0"
 influxdb_port: "8086"
+# Host used by local API calls (auth check, user/db creation).
+# When the service listens on 0.0.0.0 / ::, we connect via loopback.
+influxdb_api_host: "{{ '127.0.0.1' if influxdb_bind_address in ['0.0.0.0', '::', '*'] else influxdb_bind_address }}"
+
+# Authentication
 influxdb_admin_user: "admin"
 influxdb_admin_pw: "admin"
-influxdb_basic_auth: true 
+influxdb_basic_auth: true
+
+# TLS / HTTPS
 tls_cert_path: ""
 tls_key_path: ""
 influxdb_https: false
+
+# Repository management (only relevant for RHEL/CentOS — Debian uses distro repo).
+# Set to false to skip creating /etc/yum.repos.d/influxdata.repo if you
+# already ship it via your own channel.
+influxdb_manage_repo: true
+
+# Python client used by community.general.influxdb_* modules.
+# Installed via pip on all supported platforms.
+influxdb_python_client: influxdb
 
 influxdb_config: |
   reporting-disabled = true
@@ -30,7 +53,7 @@ influxdb_config: |
   [http]
     auth-enabled = {{ influxdb_basic_auth | string | lower }}
     bind-address = "{{ influxdb_bind_address }}:8086"
-    https-enabled = {{ influxdb_https | string | lower }} 
+    https-enabled = {{ influxdb_https | string | lower }}
     https-certificate = "{{ tls_cert_path }}"
     https-private-key = "{{ tls_key_path }}"
     access-log-path = "{{ influxdb_log_dir }}/access.log"

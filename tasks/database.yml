@@ -1,0 +1,49 @@
+---
+- name: Check auth status
+  ansible.builtin.uri:
+    url: "{{ 'https' if influxdb_https else 'http' }}://{{ influxdb_api_host }}:{{ influxdb_port }}/query"
+    validate_certs: "{{ influxdb_https | bool }}"
+    status_code:
+      - 200
+      - 400
+      - 401
+  register: influxdb_query_result
+
+- name: Create InfluxDB admin user
+  community.general.influxdb_user:
+    hostname: "{{ influxdb_api_host }}"
+    port: "{{ influxdb_port }}"
+    user_name: "{{ influxdb_admin_user }}"
+    user_password: "{{ influxdb_admin_pw }}"
+    admin: true
+    state: present
+    ssl: "{{ influxdb_https }}"
+    validate_certs: "{{ influxdb_https | bool }}"
+  when:
+    - influxdb_basic_auth | bool
+    - influxdb_query_result.json is defined
+    - influxdb_query_result.json.error | default('') != "unable to parse authentication credentials"
+
+- name: Create InfluxDB database
+  community.general.influxdb_database:
+    hostname: "{{ influxdb_api_host }}"
+    port: "{{ influxdb_port }}"
+    username: "{{ influxdb_admin_user }}"
+    password: "{{ influxdb_admin_pw }}"
+    database_name: "{{ influxdb_db_name }}"
+    ssl: "{{ influxdb_https }}"
+    validate_certs: "{{ influxdb_https | bool }}"
+
+- name: Create database user
+  community.general.influxdb_user:
+    hostname: "{{ influxdb_api_host }}"
+    port: "{{ influxdb_port }}"
+    username: "{{ influxdb_admin_user }}"
+    password: "{{ influxdb_admin_pw }}"
+    user_name: "{{ influxdb_db_user }}"
+    user_password: "{{ influxdb_db_pw }}"
+    state: present
+    grants: "{{ influxdb_db_priviliges }}"
+    ssl: "{{ influxdb_https }}"
+    validate_certs: "{{ influxdb_https | bool }}"
+  notify: Restart influxdb

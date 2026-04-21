@@ -1,0 +1,27 @@
+---
+- name: Install prerequisite packages (RedHat)
+  ansible.builtin.package:
+    name: "{{ influxdb_prereq_packages }}"
+    state: present
+
+- name: Add InfluxData YUM repository
+  ansible.builtin.yum_repository:
+    name: "{{ influxdb_repo_name }}"
+    description: "{{ influxdb_repo_description }}"
+    baseurl: "{{ influxdb_repo_baseurl }}"
+    gpgkey: "{{ influxdb_repo_gpgkey }}"
+    gpgcheck: true
+    enabled: true
+    state: present
+  when: influxdb_manage_repo | bool
+
+- name: Import InfluxData GPG key
+  ansible.builtin.rpm_key:
+    key: "{{ influxdb_repo_gpgkey }}"
+    state: present
+  when: influxdb_manage_repo | bool
+
+- name: Install InfluxDB (RedHat)
+  ansible.builtin.package:
+    name: "{{ influxdb_package_name }}"
+    state: present
