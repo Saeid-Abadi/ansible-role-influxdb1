@@ -1,0 +1,63 @@
+---
+influxdb_db_dir: "/var/lib/influxdb"
+influxdb_conf_dir: "/etc/influxdb"
+influxdb_log_dir: "/var/log/influxdb"
+influxdb_bind_address: "0.0.0.0"
+influxdb_port: "8086"
+influxdb_admin_user: "admin"
+influxdb_admin_pw: "admin"
+influxdb_basic_auth: true 
+tls_cert_path: ""
+tls_key_path: ""
+influxdb_https: false
+
+influxdb_config: |
+  reporting-disabled = true
+  bind-address = "{{ influxdb_bind_address }}:8088"
+
+  [meta]
+    dir = "{{ influxdb_db_dir }}/meta"
+
+  [data]
+    dir = "{{ influxdb_db_dir }}/data"
+    wal-dir = "{{ influxdb_db_dir }}/wal"
+
+  [coordinator]
+  [retention]
+  [shard-precreation]
+  [monitor]
+
+  [http]
+    auth-enabled = {{ influxdb_basic_auth | string | lower }}
+    bind-address = "{{ influxdb_bind_address }}:8086"
+    https-enabled = {{ influxdb_https | string | lower }} 
+    https-certificate = "{{ tls_cert_path }}"
+    https-private-key = "{{ tls_key_path }}"
+    access-log-path = "{{ influxdb_log_dir }}/access.log"
+
+  [ifql]
+  [logging]
+  [subscriber]
+
+  [[graphite]]
+  [[collectd]]
+  [[opentsdb]]
+  [[udp]]
+
+  [tls]
+    min-version = "tls1.2"
+    max-version = "tls1.2"
+    ciphers = [
+      "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+      "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+      "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+      "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+    ]
+
+# influxdb database
+influxdb_db_user: icinga
+influxdb_db_pw: icinga
+influxdb_db_name: icinga
+influxdb_db_priviliges:
+  - database: '{{ influxdb_db_name }}'
+    privilege: 'ALL'
