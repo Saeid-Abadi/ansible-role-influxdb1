@@ -64,6 +64,12 @@ provisioner:
         influxdb_db_name: molecule_test
         influxdb_db_user: molecule_user
         influxdb_db_pw: molecule-db-pw
+    host_vars:
+      # Rocky 8 default /usr/bin/python3 is Python 3.6, which cannot run
+      # ansible-core >= 2.15. prepare.yml installs python39 via dnf;
+      # everything from converge onward must use that interpreter.
+      rockylinux8:
+        ansible_python_interpreter: /usr/bin/python3.9
 
 verifier:
   name: ansible
