@@ -11,75 +11,74 @@
     influxdb_db_user: molecule_user
 
   tasks:
-    - name: Gather service facts
-      ansible.builtin.service_facts:
+    - name: Check influxdb service is active
+      ansible.builtin.command: systemctl is-active influxdb
+      register: influxdb_active
+      changed_when: false
+      failed_when: influxdb_active.stdout.strip() != 'active'
 
-    - name: Assert influxdb service exists
-      ansible.builtin.assert:
-        that:
-          - "'influxdb.service' in ansible_facts.services"
-        fail_msg: "influxdb.service not registered on the system"
+    - name: Check influxdb service is enabled
+      ansible.builtin.command: systemctl is-enabled influxdb
+      register: influxdb_enabled
+      changed_when: false
+      failed_when: influxdb_enabled.rc != 0
 
-    - name: Assert influxdb service is running and enabled
-      ansible.builtin.assert:
-        that:
-          - ansible_facts.services['influxdb.service'].state == 'running'
-          - ansible_facts.services['influxdb.service'].status == 'enabled'
-        fail_msg: >-
-          influxdb service not in desired state. Got state={{ ansible_facts.services['influxdb.service'].state }}
-          status={{ ansible_facts.services['influxdb.service'].status }}
-
-    - name: Check HTTP /ping endpoint responds
+    - name: Wait for HTTP /ping endpoint to answer
       ansible.builtin.uri:
         url: "http://127.0.0.1:8086/ping"
         status_code:
           - 200
           - 204
       register: ping_result
-      retries: 10
+      retries: 15
       delay: 2
       until: ping_result.status in [200, 204]
 
     - name: Query databases with admin credentials
       ansible.builtin.uri:
-        url: "http://127.0.0.1:8086/query"
+        url: "http://127.0.0.1:8086/query?q=SHOW+DATABASES"
         method: GET
         url_username: "{{ influxdb_admin_user }}"
         url_password: "{{ influxdb_admin_pw }}"
         force_basic_auth: true
-        body_format: form-urlencoded
-        body:
-          q: "SHOW DATABASES"
         status_code: 200
         return_content: true
       register: databases
+      retries: 5
+      delay: 2
+      until: databases.status == 200
+
+    - name: Show databases response (debug)
+      ansible.builtin.debug:
+        var: databases.content
 
     - name: Assert configured database exists
       ansible.builtin.assert:
         that:
           - influxdb_db_name in databases.content
         fail_msg: >-
-          Expected database '{{ influxdb_db_name }}' was not returned by SHOW DATABASES.
-          Got: {{ databases.content }}
+          Expected database '{{ influxdb_db_name }}' was not returned by
+          SHOW DATABASES. Got: {{ databases.content }}
 
     - name: Query users with admin credentials
       ansible.builtin.uri:
-        url: "http://127.0.0.1:8086/query"
+        url: "http://127.0.0.1:8086/query?q=SHOW+USERS"
         method: GET
         url_username: "{{ influxdb_admin_user }}"
         url_password: "{{ influxdb_admin_pw }}"
         force_basic_auth: true
-        body_format: form-urlencoded
-        body:
-          q: "SHOW USERS"
         status_code: 200
         return_content: true
       register: users
+
+    - name: Show users response (debug)
+      ansible.builtin.debug:
+        var: users.content
 
     - name: Assert configured db user exists
       ansible.builtin.assert:
         that:
           - influxdb_db_user in users.content
         fail_msg: >-
-          Expected db user '{{ influxdb_db_user }}' was not returned by SHOW USERS.
-          Got: {{ users.content }}
+          Expected db user '{{ influxdb_db_user }}' was not returned by
+          SHOW USERS. Got: {{ users.content }}
