@@ -28,7 +28,7 @@ jobs:
 
       - name: Install required collections for lint
         run: |
-          ansible-galaxy collection install community.general ansible.posix
+          ansible-galaxy collection install 'community.general:>=7.0.0,<8.0.0' ansible.posix
 
       - name: Run yamllint
         run: yamllint .
@@ -67,7 +67,7 @@ jobs:
 
       - name: Install required Ansible collections
         run: |
-          ansible-galaxy collection install community.general community.docker ansible.posix
+          ansible-galaxy collection install 'community.general:>=7.0.0,<8.0.0' community.docker ansible.posix
 
       - name: Run Molecule (${{ matrix.distro }})
         env:

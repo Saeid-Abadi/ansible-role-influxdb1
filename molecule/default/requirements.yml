@@ -1,5 +1,8 @@
 ---
 collections:
+  # community.general >= 8 drops Python 3.6 target support — Rocky 8's only
+  # Python with dnf bindings is 3.6, so pin to the last 7.x line.
   - name: community.general
+    version: ">=7.0.0,<8.0.0"
   - name: community.docker
   - name: ansible.posix
