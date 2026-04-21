@@ -1,0 +1,48 @@
+---
+- name: Create InfluxDB data directory
+  ansible.builtin.file:
+    path: "{{ influxdb_db_dir }}"
+    mode: '0755'
+    owner: "{{ influxdb_user }}"
+    group: "{{ influxdb_group }}"
+    state: directory
+
+- name: Create InfluxDB log directory
+  ansible.builtin.file:
+    path: "{{ influxdb_log_dir }}"
+    mode: '0750'
+    owner: "{{ influxdb_user }}"
+    group: "{{ influxdb_group }}"
+    state: directory
+
+- name: Deploy influxdb.conf
+  ansible.builtin.template:
+    src: influxd.conf.j2
+    dest: "{{ influxdb_conf_dir }}/influxdb.conf"
+    owner: "{{ influxdb_user }}"
+    group: "{{ influxdb_group }}"
+    mode: '0644'
+    validate: "echo %s"
+  notify: Restart influxdb
+
+- name: Detect PEP 668 externally-managed Python
+  ansible.builtin.stat:
+    path: "/usr/lib/python{{ ansible_python.version.major }}.{{ ansible_python.version.minor }}/EXTERNALLY-MANAGED"
+  register: _influxdb_pep668
+  changed_when: false
+
+- name: Install Python InfluxDB client (required by community.general.influxdb_* modules)
+  ansible.builtin.pip:
+    name: "{{ influxdb_python_client }}"
+    state: present
+    extra_args: "{{ '--break-system-packages' if _influxdb_pep668.stat.exists else '' }}"
+
+- name: Ensure InfluxDB service is enabled and started
+  ansible.builtin.systemd:
+    name: "{{ influxdb_service_name }}"
+    state: started
+    enabled: true
+    masked: false
+
+- name: Flush handlers to apply any pending config changes
+  ansible.builtin.meta: flush_handlers

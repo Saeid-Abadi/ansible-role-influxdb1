@@ -1,0 +1,86 @@
+---
+- name: Install influxdb
+  ansible.builtin.apt:
+    name: influxdb
+    state: present
+    update_cache: yes
+
+- name: Enabel/Start influxdb service
+  ansible.builtin.systemd_service: 
+    name: influxdb
+    state: started
+    masked: no
+
+- name: Create influxdb config directory
+  ansible.builtin.file:
+    path: "{{ influxdb_db_dir }}"
+    mode: 0755
+    owner: influxdb
+    group: influxdb 
+    state: directory
+
+- name: Create influxdb log directory
+  ansible.builtin.file:
+    path: "{{ influxdb_log_dir }}"
+    mode: 0750
+    owner: influxdb
+    group: influxdb
+    state: directory
+
+- name: Create influxdb.conf
+  ansible.builtin.template:
+    src: influxd.conf.j2
+    dest: "{{ influxdb_conf_dir }}/influxdb.conf"
+    validate: echo %s
+
+- name: Install influxdb-pip
+  ansible.builtin.pip: 
+    name: python3-influxdb
+    state: present
+
+- name: Check auth status
+  ansible.builtin.uri:
+    url: "http://{{ influxdb_bind_address }}:{{ influxdb_port}}/query"
+    status_code:
+      - 200
+      - 400
+      - 401
+  register: query_result
+
+- name: Create Influxdb admin user
+  community.general.influxdb_user:
+    hostname: "{{ influxdb_bind_address }}"
+    port: "{{ influxdb_port }}"
+    user_name: "{{ influxdb_admin_user }}"
+    user_password: "{{ influxdb_admin_pw }}"
+    admin: true
+    state: present
+    ssl: "{{ influxdb_https }}"
+    validate_certs: "{{ true if influxdb_https else false }}"
+  when:
+    - influxdb_basic_auth | bool
+    - query_result.json['error'] != "unable to parse authentication credentials"
+
+- name: Create influxdb database
+  community.general.influxdb_database:
+    hostname: "{{ influxdb_bind_address }}"
+    port: "{{ influxdb_port }}"
+    username: "{{ influxdb_admin_user }}"
+    password: "{{ influxdb_admin_pw }}"
+    database_name: "{{ influxdb_db_name }}"
+    ssl: "{{ influxdb_https }}"
+    validate_certs: "{{ true if influxdb_https else false }}"
+
+- name: Create user for database
+  community.general.influxdb_user:
+    hostname: "{{ influxdb_bind_address }}"
+    port: "{{ influxdb_port }}"
+    username: "{{ influxdb_admin_user }}"
+    password: "{{ influxdb_admin_pw }}"
+    user_name:      "{{ influxdb_db_user }}"
+    user_password:  "{{ influxdb_db_pw }}"
+    state: present
+    grants: "{{ influxdb_db_priviliges }}"
+    ssl: "{{ influxdb_https }}"
+    validate_certs: "{{ true if influxdb_https else false }}"
+  notify: Restart influxdb

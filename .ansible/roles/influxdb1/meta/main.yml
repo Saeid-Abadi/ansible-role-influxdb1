@@ -1,8 +1,5 @@
----
 galaxy_info:
   author: Saeid Hassan-Abadi
-  namespace: netways
-  role_name: influxdb1
   description: Install and configure InfluxDB 1
   license: MIT
   min_ansible_version: "2.9"
@@ -10,12 +7,5 @@ galaxy_info:
     - name: Debian
       versions:
         - all
-    - name: Ubuntu
-      versions:
-        - all
-    - name: EL
-      versions:
-        - "8"
-        - "9"
 
 dependencies: []
