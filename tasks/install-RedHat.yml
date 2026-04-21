@@ -4,20 +4,21 @@
     name: "{{ influxdb_prereq_packages }}"
     state: present
 
-# Importing from a local file is more reliable on Rocky 8 than from an HTTPS URL.
-- name: Download InfluxData GPG key
+- name: Download InfluxData GPG keys
   ansible.builtin.get_url:
-    url: "{{ influxdb_repo_gpgkey }}"
-    dest: "{{ influxdb_repo_gpgkey_path }}"
+    url: "{{ item.url }}"
+    dest: "{{ item.path }}"
     mode: '0644'
     owner: root
     group: root
+  loop: "{{ influxdb_repo_gpgkeys }}"
   when: influxdb_manage_repo | bool
 
-- name: Import InfluxData GPG key into rpm
+- name: Import InfluxData GPG keys into rpm
   ansible.builtin.rpm_key:
-    key: "{{ influxdb_repo_gpgkey_path }}"
+    key: "{{ item.path }}"
     state: present
+  loop: "{{ influxdb_repo_gpgkeys }}"
   when: influxdb_manage_repo | bool
 
 - name: Add InfluxData YUM repository
@@ -25,7 +26,7 @@
     name: "{{ influxdb_repo_name }}"
     description: "{{ influxdb_repo_description }}"
     baseurl: "{{ influxdb_repo_baseurl }}"
-    gpgkey: "file://{{ influxdb_repo_gpgkey_path }}"
+    gpgkey: "{{ influxdb_repo_gpgkeys | map(attribute='path') | map('regex_replace', '^', 'file://') | list }}"
     gpgcheck: true
     enabled: true
     state: present

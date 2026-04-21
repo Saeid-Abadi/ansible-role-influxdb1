@@ -2,14 +2,16 @@
 influxdb_package_name: influxdb
 influxdb_service_name: influxdb
 
-# The unified stable repo is signed with influxdata-archive_compat.key;
-# the legacy rhel/$releasever path uses a different key and fails GPG
-# validation on Rocky 8.
+# InfluxData rotated signing keys in 2023 — import both the current and the
+# legacy/compat key so packages signed with either verify correctly.
 influxdb_repo_name: influxdata
 influxdb_repo_description: "InfluxData Repository - Stable"
 influxdb_repo_baseurl: "https://repos.influxdata.com/stable/$basearch/main"
-influxdb_repo_gpgkey: "https://repos.influxdata.com/influxdata-archive_compat.key"
-influxdb_repo_gpgkey_path: /etc/pki/rpm-gpg/RPM-GPG-KEY-influxdata
+influxdb_repo_gpgkeys:
+  - url: "https://repos.influxdata.com/influxdata-archive.key"
+    path: /etc/pki/rpm-gpg/RPM-GPG-KEY-influxdata
+  - url: "https://repos.influxdata.com/influxdata-archive_compat.key"
+    path: /etc/pki/rpm-gpg/RPM-GPG-KEY-influxdata-compat
 
 # Do not add "curl" — Rocky/RHEL 9 ships curl-minimal and the full curl
 # package conflicts with it. The role uses ansible.builtin.get_url.
