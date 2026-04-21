@@ -11,17 +11,32 @@
     influxdb_db_user: molecule_user
 
   tasks:
-    - name: Check influxdb service is active
-      ansible.builtin.command: systemctl is-active influxdb
-      register: influxdb_active
-      changed_when: false
-      failed_when: influxdb_active.stdout.strip() != 'active'
+    - name: Gather service facts
+      ansible.builtin.service_facts:
 
-    - name: Check influxdb service is enabled
-      ansible.builtin.command: systemctl is-enabled influxdb
-      register: influxdb_enabled
-      changed_when: false
-      failed_when: influxdb_enabled.rc != 0
+    - name: Assert influxdb service is registered
+      ansible.builtin.assert:
+        that:
+          - "'influxdb.service' in ansible_facts.services"
+        fail_msg: "influxdb.service not registered on the system"
+
+    - name: Assert influxdb service is running
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.services['influxdb.service'].state == 'running'
+        fail_msg: >-
+          influxdb service is not running. State:
+          {{ ansible_facts.services['influxdb.service'].state | default('not-found') }}
+
+    - name: Assert influxdb service is enabled at boot
+      ansible.builtin.assert:
+        that:
+          - >-
+            ansible_facts.services['influxdb.service'].status
+            in ['enabled', 'enabled-runtime', 'static', 'alias']
+        fail_msg: >-
+          influxdb service is not enabled. Status:
+          {{ ansible_facts.services['influxdb.service'].status | default('not-found') }}
 
     - name: Wait for HTTP /ping endpoint to answer
       ansible.builtin.uri:
