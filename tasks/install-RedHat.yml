@@ -4,10 +4,7 @@
     name: "{{ influxdb_prereq_packages }}"
     state: present
 
-# Download the GPG key to a local file first. On Rocky 8 importing the
-# key directly from an HTTPS URL is less reliable than importing from a
-# local file, and the unified stable repo is signed with
-# influxdata-archive_compat.key (not the legacy per-distro key).
+# Importing from a local file is more reliable on Rocky 8 than from an HTTPS URL.
 - name: Download InfluxData GPG key
   ansible.builtin.get_url:
     url: "{{ influxdb_repo_gpgkey }}"

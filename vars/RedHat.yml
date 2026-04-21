@@ -1,22 +1,18 @@
 ---
-# OS-family specific variables for RHEL / CentOS / Rocky / AlmaLinux
-
 influxdb_package_name: influxdb
 influxdb_service_name: influxdb
 
-# Official InfluxData YUM repository — InfluxDB v1 is not in the default
-# RHEL/CentOS repositories. We use the unified "stable" repo layout
-# (https://docs.influxdata.com/influxdb/v1/introduction/install/),
-# which is signed with influxdata-archive_compat.key. The legacy
-# per-distro path (rhel/$releasever/$basearch/stable) is signed with
-# an older key and causes GPG validation failures on Rocky 8.
+# The unified stable repo is signed with influxdata-archive_compat.key;
+# the legacy rhel/$releasever path uses a different key and fails GPG
+# validation on Rocky 8.
 influxdb_repo_name: influxdata
 influxdb_repo_description: "InfluxData Repository - Stable"
 influxdb_repo_baseurl: "https://repos.influxdata.com/stable/$basearch/main"
 influxdb_repo_gpgkey: "https://repos.influxdata.com/influxdata-archive_compat.key"
 influxdb_repo_gpgkey_path: /etc/pki/rpm-gpg/RPM-GPG-KEY-influxdata
 
+# Do not add "curl" — Rocky/RHEL 9 ships curl-minimal and the full curl
+# package conflicts with it. The role uses ansible.builtin.get_url.
 influxdb_prereq_packages:
   - ca-certificates
-  - curl
   - python3-pip

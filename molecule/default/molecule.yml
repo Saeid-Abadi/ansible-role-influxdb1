@@ -55,9 +55,8 @@ provisioner:
   inventory:
     group_vars:
       all:
-        # Docker driver attaches as root via `docker exec`, so we don't need
-        # sudo. This avoids a known PAM/sudo failure on Rocky 9 containers
-        # ("PAM account management error").
+        # docker exec is already root — become:true triggers a PAM/sudo
+        # failure on Rocky 9 containers.
         ansible_become: false
         influxdb_admin_user: admin
         influxdb_admin_pw: molecule-admin-pw

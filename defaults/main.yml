@@ -1,37 +1,26 @@
 ---
-# Directory paths
 influxdb_db_dir: "/var/lib/influxdb"
 influxdb_conf_dir: "/etc/influxdb"
 influxdb_log_dir: "/var/log/influxdb"
 
-# File ownership
 influxdb_user: influxdb
 influxdb_group: influxdb
 
-# Networking
 influxdb_bind_address: "0.0.0.0"
 influxdb_port: "8086"
-# Host used by local API calls (auth check, user/db creation).
-# When the service listens on 0.0.0.0 / ::, we connect via loopback.
+# Loopback is used for local API calls when the service binds to a wildcard.
 influxdb_api_host: "{{ '127.0.0.1' if influxdb_bind_address in ['0.0.0.0', '::', '*'] else influxdb_bind_address }}"
 
-# Authentication
 influxdb_admin_user: "admin"
 influxdb_admin_pw: "admin"
 influxdb_basic_auth: true
 
-# TLS / HTTPS
 tls_cert_path: ""
 tls_key_path: ""
 influxdb_https: false
 
-# Repository management (only relevant for RHEL/CentOS — Debian uses distro repo).
-# Set to false to skip creating /etc/yum.repos.d/influxdata.repo if you
-# already ship it via your own channel.
 influxdb_manage_repo: true
 
-# Python client used by community.general.influxdb_* modules.
-# Installed via pip on all supported platforms.
 influxdb_python_client: influxdb
 
 influxdb_config: |
@@ -77,7 +66,6 @@ influxdb_config: |
       "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
     ]
 
-# influxdb database
 influxdb_db_user: icinga
 influxdb_db_pw: icinga
 influxdb_db_name: icinga
